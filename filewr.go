@@ -100,3 +100,20 @@ func main() {
     
     // Your main program logic here
 }
+
+
+
+
+// expandPath expands the tilde (~) to the user's home directory
+func expandPath(path string) (string, error) {
+    if !strings.HasPrefix(path, "~/") {
+        return path, nil
+    }
+    
+    currentUser, err := user.Current()
+    if err != nil {
+        return "", err
+    }
+    
+    return filepath.Join(currentUser.HomeDir, path[2:]), nil
+}
