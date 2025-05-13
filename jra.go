@@ -6,7 +6,8 @@ import (
     "log"
     "os"
 
-    "github.com/ctreminiom/go-atlassian/jira/v2"
+    v2 "github.com/ctreminiom/go-atlassian/jira/v2"
+    "github.com/ctreminiom/go-atlassian/pkg/infra/models"
 )
 
 func main() {
@@ -25,7 +26,7 @@ func main() {
     newLabel := os.Args[2]
 
     // Create a new Jira client
-    client, err := jira.New(nil, jiraURL)
+    client, err := v2.New(nil, jiraURL)
     if err != nil {
         log.Fatalf("Error creating Jira client: %v", err)
     }
@@ -36,20 +37,19 @@ func main() {
     // Set up context
     ctx := context.Background()
 
-    // Create operation to add the new label
-    // Note: Jira will handle duplicates automatically (won't add if already exists)
-    operation := &jira.UpdateOperationScheme{
-        Operation: "add",
-        Path:      "/fields/labels",
-        Value:     newLabel,
+    // Create the update payload
+    payload := &models.IssueUpdateScheme{
+        Update: &models.IssueFieldOperationsScheme{
+            Labels: []*models.IssueFieldOperationScheme{
+                {
+                    Add: newLabel,
+                },
+            },
+        },
     }
 
     // Update the issue
-    _, err = client.Issue.DoTransition(ctx, issueKey, &jira.IssueUpdateScheme{
-        Update: &jira.UpdateRequestScheme{
-            Operations: []*jira.UpdateOperationScheme{operation},
-        },
-    })
+    _, err = client.Issue.Update(ctx, issueKey, payload)
     if err != nil {
         log.Fatalf("Error updating issue label: %v", err)
     }
