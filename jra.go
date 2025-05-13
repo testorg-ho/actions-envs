@@ -6,8 +6,7 @@ import (
     "log"
     "os"
 
-    v2 "github.com/ctreminiom/go-atlassian/jira/v2"
-    "github.com/ctreminiom/go-atlassian/pkg/infra/models"
+    "github.com/ctreminiom/go-atlassian/jira/v2"
 )
 
 func main() {
@@ -37,14 +36,36 @@ func main() {
     // Set up context
     ctx := context.Background()
 
+    // Get the current issue to retrieve existing labels
+    issue, _, err := client.Issue.Get(ctx, issueKey, nil)
+    if err != nil {
+        log.Fatalf("Error getting issue: %v", err)
+    }
+
+    // Get existing labels and add the new one
+    existingLabels := issue.Fields.Labels
+    
+    // Check if label already exists to avoid unnecessary updates
+    labelExists := false
+    for _, label := range existingLabels {
+        if label == newLabel {
+            labelExists = true
+            break
+        }
+    }
+    
+    if labelExists {
+        fmt.Printf("Label '%s' already exists on issue %s. No update needed.\n", newLabel, issueKey)
+        return
+    }
+    
+    // Add the new label
+    updatedLabels := append(existingLabels, newLabel)
+    
     // Create the update payload
-    payload := &models.IssueUpdateScheme{
-        Update: &models.IssueFieldOperationsScheme{
-            Labels: []*models.IssueFieldOperationScheme{
-                {
-                    Add: newLabel,
-                },
-            },
+    payload := map[string]interface{}{
+        "fields": map[string]interface{}{
+            "labels": updatedLabels,
         },
     }
 
