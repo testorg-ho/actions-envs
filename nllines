@@ -1,0 +1,33 @@
+package main
+
+import (
+    "fmt"
+    "strings"
+)
+
+func getFirstNLines(input string, n int) string {
+    // Split the string into lines
+    lines := strings.Split(input, "\n")
+    
+    // Determine how many lines to return (either n or the total number of lines, whichever is smaller)
+    count := len(lines)
+    if count > n {
+        count = n
+    }
+    
+    // Take only the first 'count' lines
+    limitedLines := lines[:count]
+    
+    // Join the lines back into a single string
+    return strings.Join(limitedLines, "\n")
+}
+
+func main() {
+    // Example string with multiple lines
+    multilineString := "Line 1\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7\nLine 8\nLine 9\nLine 10\nLine 11\nLine 12"
+    
+    // Get the first 10 lines
+    result := getFirstNLines(multilineString, 10)
+    
+    fmt.Println(result)
+}
