@@ -86,3 +86,16 @@ func getEnvOrDefault(key, defaultValue string) string {
     }
     return value
 }
+
+
+
+
+
+if err != nil {
+    // Check if error has response data (depends on the client)
+    if apiErr, ok := err.(*v2.ErrorResponse); ok {
+        log.Printf("API Error: %s", apiErr.Response.Status)
+        log.Printf("Error details: %s", apiErr.Message)
+    }
+    log.Fatalf("Error updating issue label: %v", err)
+}
