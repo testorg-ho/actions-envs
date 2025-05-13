@@ -31,3 +31,83 @@ func main() {
     
     fmt.Println(result)
 }
+
+
+
+
+
+
+func TestGetFirstNLines(t *testing.T) {
+    // Define test cases as a slice of anonymous structs
+    testCases := []struct {
+        name     string
+        input    string
+        n        int
+        expected string
+    }{
+        {
+            name:     "empty string",
+            input:    "",
+            n:        10,
+            expected: "",
+        },
+        {
+            name:     "single line",
+            input:    "Line 1",
+            n:        10,
+            expected: "Line 1",
+        },
+        {
+            name:     "exactly n lines",
+            input:    "Line 1\nLine 2\nLine 3",
+            n:        3,
+            expected: "Line 1\nLine 2\nLine 3",
+        },
+        {
+            name:     "fewer than n lines",
+            input:    "Line 1\nLine 2\nLine 3",
+            n:        5,
+            expected: "Line 1\nLine 2\nLine 3",
+        },
+        {
+            name:     "more than n lines",
+            input:    "Line 1\nLine 2\nLine 3\nLine 4\nLine 5",
+            n:        3,
+            expected: "Line 1\nLine 2\nLine 3",
+        },
+        {
+            name:     "zero n value",
+            input:    "Line 1\nLine 2\nLine 3",
+            n:        0,
+            expected: "",
+        },
+        {
+            name:     "negative n value",
+            input:    "Line 1\nLine 2\nLine 3",
+            n:        -1,
+            expected: "",
+        },
+        {
+            name:     "empty lines in content",
+            input:    "Line 1\n\nLine 3\nLine 4",
+            n:        3,
+            expected: "Line 1\n\nLine 3",
+        },
+        {
+            name:     "trailing newline",
+            input:    "Line 1\nLine 2\nLine 3\n",
+            n:        3,
+            expected: "Line 1\nLine 2\nLine 3",
+        },
+    }
+
+    // Run through all test cases
+    for _, tc := range testCases {
+        t.Run(tc.name, func(t *testing.T) {
+            result := getFirstNLines(tc.input, tc.n)
+            if result != tc.expected {
+                t.Errorf("getFirstNLines(%q, %d) = %q; want %q", tc.input, tc.n, result, tc.expected)
+            }
+        })
+    }
+}
