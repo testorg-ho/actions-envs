@@ -99,3 +99,10 @@ if err != nil {
     }
     log.Fatalf("Error updating issue label: %v", err)
 }
+
+    // Create the update payload using models.IssueSchemaV1
+    payload := &models.IssueSchemaV1{
+        Fields: &models.IssueFieldsSchemeV1{
+            Labels: updatedLabels,
+        },
+    }
