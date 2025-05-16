@@ -1,0 +1,111 @@
+package main
+
+import (
+    "encoding/json"
+    "fmt"
+)
+
+// ParseJSONArrayString converts a JSON array string to a slice of strings
+func ParseJSONArrayString(jsonStr string) ([]string, error) {
+    var elements []string
+    err := json.Unmarshal([]byte(jsonStr), &elements)
+    return elements, err
+}
+
+func main() {
+    // Example usage
+    str := `["aaa", "bbb"]`
+    elements, err := ParseJSONArrayString(str)
+    if err != nil {
+        fmt.Println("Error parsing JSON:", err)
+        return
+    }
+    
+    fmt.Printf("Elements: %v\n", elements)
+}
+
+
+
+package main
+
+import (
+    "reflect"
+    "testing"
+)
+
+func TestParseJSONArrayString(t *testing.T) {
+    // Define test cases
+    tests := []struct {
+        name    string
+        input   string
+        want    []string
+        wantErr bool
+    }{
+        {
+            name:    "basic array",
+            input:   `["aaa", "bbb"]`,
+            want:    []string{"aaa", "bbb"},
+            wantErr: false,
+        },
+        {
+            name:    "empty array",
+            input:   `[]`,
+            want:    []string{},
+            wantErr: false,
+        },
+        {
+            name:    "single element",
+            input:   `["only one"]`,
+            want:    []string{"only one"},
+            wantErr: false,
+        },
+        {
+            name:    "special characters",
+            input:   `["special\"chars", "line\nbreak", "tab\tchar"]`,
+            want:    []string{"special\"chars", "line\nbreak", "tab\tchar"},
+            wantErr: false,
+        },
+        {
+            name:    "unicode characters",
+            input:   `["こんにちは", "你好", "👋"]`,
+            want:    []string{"こんにちは", "你好", "👋"},
+            wantErr: false,
+        },
+        {
+            name:    "invalid JSON",
+            input:   `["unclosed array"`,
+            want:    nil,
+            wantErr: true,
+        },
+        {
+            name:    "not an array",
+            input:   `{"key": "value"}`,
+            want:    nil,
+            wantErr: true,
+        },
+        {
+            name:    "mixed types (will convert to strings)",
+            input:   `["string", 123, true, null]`,
+            want:    nil,
+            wantErr: true, // This will error because JSON numbers/booleans can't convert directly to strings
+        },
+    }
+
+    // Run all test cases
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            got, err := ParseJSONArrayString(tt.input)
+            
+            // Check if error matches expectation
+            if (err != nil) != tt.wantErr {
+                t.Errorf("ParseJSONArrayString() error = %v, wantErr %v", err, tt.wantErr)
+                return
+            }
+            
+            // If no error and result doesn't match expected
+            if err == nil && !reflect.DeepEqual(got, tt.want) {
+                t.Errorf("ParseJSONArrayString() = %v, want %v", got, tt.want)
+            }
+        })
+    }
+}
