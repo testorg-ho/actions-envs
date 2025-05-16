@@ -1,0 +1,31 @@
+name: Conditional Dependency Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      ARGS:
+        description: 'Optional arguments'
+        required: false
+        type: string
+
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    # Only run job1 if ARGS is empty
+    if: ${{ inputs.ARGS == '' }}
+    steps:
+      - name: Run job1
+        run: echo "Job 1 is running because ARGS is empty"
+
+  job2:
+    runs-on: ubuntu-latest
+    # If ARGS is empty, wait for job1, otherwise run immediately
+    needs: ${{ inputs.ARGS == '' && fromJSON('["job1"]') || fromJSON('[]') }}
+    steps:
+      - name: Run job2
+        run: |
+          if [ "${{ inputs.ARGS }}" == "" ]; then
+            echo "Job 2 running after job1 (ARGS is empty)"
+          else
+            echo "Job 2 running directly (ARGS = ${{ inputs.ARGS }})"
+          fi
