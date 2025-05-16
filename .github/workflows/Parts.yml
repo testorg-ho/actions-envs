@@ -14,7 +14,7 @@ jobs:
       - name: Set hardcoded matrix
         id: set-matrix
         run: |
-          # Hardcoded matrix definition with 3 partitions
+          # Hardcoded matrix definition with 3 partitions using CLI only
           MATRIX='{"partition":[0,1,2],"repos":[["org/repo1","org/repo2","org/repo3"],["org/repo4","org/repo5","org/repo6"],["org/repo7","org/repo8"]]}'
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           
@@ -29,28 +29,46 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        
-      - name: Set up environment
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
           
       - name: Process repositories
         run: |
           echo "Processing repositories in partition ${{ matrix.partition }}"
           
-          # Loop through each repository in this partition
+          # Create results directory
+          mkdir -p results
+          
+          # Loop through each repository in this partition using bash only
           for repo in ${{ join(matrix.repos, ' ') }}; do
             echo "Processing $repo..."
             
-            # Your actual processing logic here
-            # For example:
-            # - Clone repository
-            # - Run analysis
-            # - Generate reports
+            # Extract org and repo name
+            ORG=$(echo $repo | cut -d '/' -f 1)
+            REPO_NAME=$(echo $repo | cut -d '/' -f 2)
             
-            # Simulate some work
-            sleep 2
+            # Create directory for clone
+            mkdir -p temp_repos
+            
+            # Clone repository (shallow clone for speed)
+            echo "Cloning $repo..."
+            git clone --depth 1 https://github.com/$repo.git temp_repos/$REPO_NAME
+            
+            # Process the repository using only CLI tools
+            echo "Analyzing $repo..."
+            
+            # Example: Count files by type
+            echo "File counts by extension:" > results/$REPO_NAME-summary.txt
+            find temp_repos/$REPO_NAME -type f | grep -v "/.git/" | rev | cut -d '.' -f 1 | rev | sort | uniq -c | sort -nr >> results/$REPO_NAME-summary.txt
+            
+            # Example: Get commit count
+            echo "Total commits (in shallow clone):" >> results/$REPO_NAME-summary.txt
+            git -C temp_repos/$REPO_NAME rev-list --count HEAD >> results/$REPO_NAME-summary.txt
+            
+            # Example: List contributors
+            echo "Contributors:" >> results/$REPO_NAME-summary.txt
+            git -C temp_repos/$REPO_NAME shortlog -sn --no-merges >> results/$REPO_NAME-summary.txt
+            
+            # Clean up
+            rm -rf temp_repos/$REPO_NAME
             
             echo "Finished processing $repo"
           done
