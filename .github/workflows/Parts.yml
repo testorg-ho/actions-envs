@@ -18,7 +18,7 @@ jobs:
         id: create-matrix
         run: |
           # Define list of repositories (in real world, could come from API, file, etc.)
-          REPOS=("org/repo1" "org/repo2" "org/repo3" "org/repo4" "org/repo5" "org/repo6" "org/repo7" "org/repo8")
+          REPOS=("org/repo1", "org/repo2", "org/repo3", "org/repo4", "org/repo5", "org/repo6", "org/repo7", "org/repo8")
           
           # Define number of partitions
           PARTITIONS=3
