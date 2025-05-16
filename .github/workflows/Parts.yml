@@ -41,37 +41,6 @@ jobs:
           for repo in ${{ join(matrix.repos, ' ') }}; do
             echo "Processing $repo..."
             
-            # Extract org and repo name
-            ORG=$(echo $repo | cut -d '/' -f 1)
-            REPO_NAME=$(echo $repo | cut -d '/' -f 2)
-            
-            # Create directory for clone
-            mkdir -p temp_repos
-            
-            # Clone repository (shallow clone for speed)
-            echo "Cloning $repo..."
-            git clone --depth 1 https://github.com/$repo.git temp_repos/$REPO_NAME
-            
-            # Process the repository using only CLI tools
-            echo "Analyzing $repo..."
-            
-            # Example: Count files by type
-            echo "File counts by extension:" > results/$REPO_NAME-summary.txt
-            find temp_repos/$REPO_NAME -type f | grep -v "/.git/" | rev | cut -d '.' -f 1 | rev | sort | uniq -c | sort -nr >> results/$REPO_NAME-summary.txt
-            
-            # Example: Get commit count
-            echo "Total commits (in shallow clone):" >> results/$REPO_NAME-summary.txt
-            git -C temp_repos/$REPO_NAME rev-list --count HEAD >> results/$REPO_NAME-summary.txt
-            
-            # Example: List contributors
-            echo "Contributors:" >> results/$REPO_NAME-summary.txt
-            git -C temp_repos/$REPO_NAME shortlog -sn --no-merges >> results/$REPO_NAME-summary.txt
-            
-            # Clean up
-            rm -rf temp_repos/$REPO_NAME
-            
-            echo "Finished processing $repo"
-          done
           
       - name: Upload results
         uses: actions/upload-artifact@v3
