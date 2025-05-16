@@ -14,8 +14,8 @@ jobs:
       - name: Set hardcoded matrix
         id: set-matrix
         run: |
-          # Hardcoded matrix definition with 3 partitions using CLI only
-          MATRIX='{"partition":[0,1,2],"repos":[["org/repo1","org/repo2","org/repo3"],["org/repo4","org/repo5","org/repo6"],["org/repo7","org/repo8"]]}'
+          # Hardcoded matrix definition as a dictionary
+          MATRIX='{"include":[{"partition":0,"repos":["org/repo1","org/repo2","org/repo3"]},{"partition":1,"repos":["org/repo4","org/repo5","org/repo6"]},{"partition":2,"repos":["org/repo7","org/repo8"]}]}'
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           
   worker:
@@ -27,24 +27,18 @@ jobs:
       fail-fast: false  # Continue other jobs even if one fails
       
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-          
       - name: Process repositories
         run: |
           echo "Processing repositories in partition ${{ matrix.partition }}"
           
-          # Create results directory
-          mkdir -p results
-          
-          # Loop through each repository in this partition using bash only
+          # Loop through each repository in this partition
           for repo in ${{ join(matrix.repos, ' ') }}; do
-            echo "Processing $repo..."
-            
+            echo "Processing repo: $repo"
+          done
           
       - name: Upload results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: results-partition-${{ matrix.partition }}
-          path: ./results/
+          path: .
           retention-days: 7
